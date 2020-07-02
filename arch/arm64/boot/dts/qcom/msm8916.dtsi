@@ -556,6 +556,42 @@
 				reg = <0xef 0x1>;
 				bits = <5 3>;
 			};
+
+			cpr_efuse_acc_override: acc-override@6 {
+				reg = <0x06 0x4>;
+				bits = <4 1>;
+			};
+			cpr_efuse_init_voltage1: ivoltage1@dc {
+				reg = <0xdc 0x4>;
+				bits = <4 6>;
+			};
+			cpr_efuse_init_voltage2: ivoltage2@da {
+				reg = <0xda 0x4>;
+				bits = <2 6>;
+			};
+			cpr_efuse_init_voltage3: ivoltage3@d8 {
+				reg = <0xd8 0x4>;
+				bits = <0 6>;
+			};
+			cpr_efuse_quot1: quot1@dd {
+				reg = <0xdd 0x4>;
+				bits = <2 12>;
+			};
+			cpr_efuse_quot2: quot2@db {
+				reg = <0xdb 0x4>;
+				bits = <0 12>;
+			};
+			cpr_efuse_quot3: quot3@d8 {
+				reg = <0xd8 0x4>;
+				bits = <6 12>;
+			};
+			cpr_efuse_ring: ring@de {
+				reg = <0xde 0x4>;
+				bits = <6 3>;
+			};
+			tsens_calsel: calsel@ec {
+				reg = <0xec 0x4>;
+			};
 		};
 
 		rpm_msg_ram: sram@60000 {
@@ -2563,6 +2599,84 @@
 			#clock-cells = <0>;
 			clocks = <&xo_board>;
 			clock-names = "xo";
+		};
+
+		cpr: power-controller@b018000 {
+			compatible = "qcom,msm8916-cpr", "qcom,cpr";
+			reg = <0x0b018000 0x1000>;
+			interrupts = <GIC_SPI 15 IRQ_TYPE_EDGE_RISING>;
+			clocks = <&xo_board>;
+			clock-names = "ref";
+			vdd-apc-supply = <&pm8916_spmi_s2>;
+			#power-domain-cells = <0>;
+			operating-points-v2 = <&cpr_opp_table>;
+			acc-syscon = <&tcsr>;
+
+			nvmem-cells = <&cpr_efuse_acc_override>,
+				<&cpr_efuse_init_voltage1>,
+				<&cpr_efuse_init_voltage2>,
+				<&cpr_efuse_init_voltage3>,
+				<&cpr_efuse_quot1>,
+				<&cpr_efuse_quot2>,
+				<&cpr_efuse_quot3>,
+				/*
+				 * For some reason, ring_osc1-3 are all read
+				 * from the same NVMEM cell...
+				 */
+				<&cpr_efuse_ring>,
+				<&cpr_efuse_ring>,
+				<&cpr_efuse_ring>;
+			nvmem-cell-names = "cpr_acc_override",
+				"cpr_init_voltage1",
+				"cpr_init_voltage2",
+				"cpr_init_voltage3",
+				"cpr_quotient1",
+				"cpr_quotient2",
+				"cpr_quotient3",
+				"cpr_ring_osc1",
+				"cpr_ring_osc2",
+				"cpr_ring_osc3";
+
+			cpr_opp_table: opp-table {
+				compatible = "operating-points-v2-qcom-level";
+
+				cpr_opp1: opp1 {
+					opp-level = <1>;
+					qcom,opp-fuse-level = <1>;
+				};
+				cpr_opp2: opp2 {
+					opp-level = <2>;
+					qcom,opp-fuse-level = <1>;
+				};
+				cpr_opp3: opp3 {
+					opp-level = <3>;
+					qcom,opp-fuse-level = <2>;
+				};
+				cpr_opp4: opp4 {
+					opp-level = <4>;
+					qcom,opp-fuse-level = <2>;
+				};
+				cpr_opp5: opp5 {
+					opp-level = <5>;
+					qcom,opp-fuse-level = <3>;
+				};
+				cpr_opp6: opp6 {
+					opp-level = <6>;
+					qcom,opp-fuse-level = <3>;
+				};
+				cpr_opp7: opp7 {
+					opp-level = <7>;
+					qcom,opp-fuse-level = <3>;
+				};
+				cpr_opp8: opp8 {
+					opp-level = <8>;
+					qcom,opp-fuse-level = <3>;
+				};
+				cpr_opp9: opp9 {
+					opp-level = <9>;
+					qcom,opp-fuse-level = <3>;
+				};
+			};
 		};
 
 		timer@b020000 {
