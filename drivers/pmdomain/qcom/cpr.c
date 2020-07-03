@@ -186,9 +186,11 @@ struct cpr_desc {
 struct acc_desc {
 	unsigned int	enable_reg;
 	u32		enable_mask;
+	u8		override_value;
 
 	struct reg_sequence	*config;
 	struct reg_sequence	*settings;
+	struct reg_sequence	*override_settings;
 	int			num_regs_per_fuse;
 };
 
@@ -854,10 +856,21 @@ static int cpr_fuse_corner_init(struct cpr_drv *drv)
 	struct fuse_corner_data *fdata;
 	struct fuse_corner *fuse, *end;
 	int uV;
+	u32 val = 0;
 	const struct reg_sequence *accs;
 	int ret;
 
 	accs = acc_desc->settings;
+	if (acc_desc->override_settings) {
+		ret = nvmem_cell_read_variable_le_u32(drv->dev,
+						      "cpr_acc_override", &val);
+		if (ret)
+			return ret;
+
+		dev_dbg(drv->dev, "acc override value: %#x\n", val);
+		if (val == acc_desc->override_value)
+			accs = acc_desc->override_settings;
+	}
 
 	step_volt = regulator_get_linear_step(drv->vdd_apc);
 	if (!step_volt)
