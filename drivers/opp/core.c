@@ -16,6 +16,7 @@
 #include <linux/device.h>
 #include <linux/export.h>
 #include <linux/pm_domain.h>
+#include <linux/pm_runtime.h>
 #include <linux/regulator/consumer.h>
 #include <linux/slab.h>
 #include <linux/xarray.h>
@@ -2368,9 +2369,13 @@ static void _opp_detach_genpd(struct opp_table *opp_table)
 		if (!opp_table->required_devs[index])
 			continue;
 
+		if (opp_table->genpd_virt_links && opp_table->genpd_virt_links[index])
+			device_link_del(opp_table->genpd_virt_links[index]);
 		dev_pm_domain_detach(opp_table->required_devs[index], false);
 		opp_table->required_devs[index] = NULL;
 	}
+
+	kfree(opp_table->genpd_virt_links);
 }
 
 /*
@@ -2394,8 +2399,10 @@ static int _opp_attach_genpd(struct opp_table *opp_table, struct device *dev,
 			const char * const *names, struct device ***virt_devs)
 {
 	struct device *virt_dev;
-	int index = 0, ret = -EINVAL;
+	struct device_link *dev_link;
+	int index = 0, ret = -EINVAL, num_devs;
 	const char * const *name = names;
+	u32 flags;
 
 	if (!opp_table->required_devs) {
 		dev_err(dev, "Required OPPs not available, can't attach genpd\n");
@@ -2442,6 +2449,32 @@ static int _opp_attach_genpd(struct opp_table *opp_table, struct device *dev,
 		index++;
 		name++;
 	}
+
+	/* Create device links to enable the power domains when necessary */
+	opp_table->genpd_virt_links = kcalloc(opp_table->required_opp_count,
+					      sizeof(*opp_table->genpd_virt_links),
+					      GFP_KERNEL);
+	if (!opp_table->genpd_virt_links)
+		goto err;
+
+	/* Turn on power domain initially if consumer is active */
+	pm_runtime_get_noresume(dev);
+	flags = DL_FLAG_PM_RUNTIME | DL_FLAG_STATELESS;
+	if (pm_runtime_active(dev))
+		flags |= DL_FLAG_RPM_ACTIVE;
+
+	num_devs = index;
+	for (index = 0; index < num_devs; index++) {
+		dev_link = device_link_add(dev, opp_table->required_devs[index],
+					   flags);
+		if (!dev_link) {
+			dev_err(dev, "Failed to create device link\n");
+			pm_runtime_put(dev);
+			goto err;
+		}
+		opp_table->genpd_virt_links[index] = dev_link;
+	}
+	pm_runtime_put(dev);
 
 	if (virt_devs)
 		*virt_devs = opp_table->required_devs;

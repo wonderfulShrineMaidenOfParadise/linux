@@ -223,6 +223,7 @@ struct opp_table {
 	struct dev_pm_opp *current_opp;
 	struct dev_pm_opp *suspend_opp;
 
+	struct device_link **genpd_virt_links;
 	struct opp_table **required_opp_tables;
 	struct device **required_devs;
 	unsigned int required_opp_count;
