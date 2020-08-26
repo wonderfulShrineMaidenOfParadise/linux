@@ -214,6 +214,7 @@ struct opp_table {
 
 	struct mutex genpd_virt_dev_lock;
 	struct device **genpd_virt_devs;
+	struct device_link **genpd_virt_links;
 	struct opp_table **required_opp_tables;
 	unsigned int required_opp_count;
 
