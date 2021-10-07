@@ -222,5 +222,15 @@
 			#sound-dai-cells = <1>;
 			status = "disabled";
 		};
+
+		pm8916_spmi_regulators: regulators {
+			compatible = "qcom,pm8916-regulators";
+
+			pm8916_spmi_s2: s2 {
+				regulator-always-on;
+				regulator-min-microvolt = <1050000>;
+				regulator-max-microvolt = <1350000>;
+			};
+		};
 	};
 };
