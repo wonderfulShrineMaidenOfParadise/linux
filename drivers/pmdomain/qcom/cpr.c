@@ -1268,11 +1268,13 @@ static const struct cpr_fuse *cpr_get_fuses(struct cpr_drv *drv)
 		if (!fuses[i].quotient)
 			return ERR_PTR(-ENOMEM);
 
+#if 0
 		snprintf(tbuf, 32, "cpr_quotient_offset%d", i + 1);
 		fuses[i].quotient_offset = devm_kstrdup(drv->dev, tbuf,
 							GFP_KERNEL);
 		if (!fuses[i].quotient_offset)
 			return ERR_PTR(-ENOMEM);
+#endif
 	}
 
 	return fuses;
