@@ -1057,7 +1057,8 @@ static unsigned long cpr_get_opp_hz_for_req(struct dev_pm_opp *ref,
 	struct device_node *ref_np;
 	struct device_node *desc_np;
 	struct device_node *child_np = NULL;
-	struct device_node *child_req_np = NULL;
+	struct of_phandle_iterator it;
+	int err;
 
 	desc_np = dev_pm_opp_of_get_opp_desc_node(cpu_dev);
 	if (!desc_np)
@@ -1067,17 +1068,18 @@ static unsigned long cpr_get_opp_hz_for_req(struct dev_pm_opp *ref,
 	if (!ref_np)
 		goto out_ref;
 
-	do {
-		of_node_put(child_req_np);
-		child_np = of_get_next_available_child(desc_np, child_np);
-		child_req_np = of_parse_phandle(child_np, "required-opps", 0);
-	} while (child_np && child_req_np != ref_np);
+	for_each_available_child_of_node(desc_np, child_np) {
+		of_for_each_phandle(&it, err, child_np, "required-opps", NULL, 0) {
+			if (it.node == ref_np) {
+				of_property_read_u64(child_np, "opp-hz", &rate);
+				of_node_put(it.node);
+				of_node_put(child_np);
+				goto done;
+			}
+		}
+	}
 
-	if (child_np && child_req_np == ref_np)
-		of_property_read_u64(child_np, "opp-hz", &rate);
-
-	of_node_put(child_req_np);
-	of_node_put(child_np);
+done:
 	of_node_put(ref_np);
 out_ref:
 	of_node_put(desc_np);
