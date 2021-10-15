@@ -527,6 +527,10 @@ struct regulator_init_data *regulator_of_get_init_data(struct device *dev,
 	if (desc->of_parse_cb) {
 		int ret;
 
+		/* Allow driver to read parsed constraints */
+		if (!config->init_data)
+			config->init_data = init_data;
+
 		ret = desc->of_parse_cb(child, desc, config);
 		if (ret) {
 			if (ret == -EPROBE_DEFER) {

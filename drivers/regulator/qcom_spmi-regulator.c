@@ -16,6 +16,7 @@
 #include <linux/platform_device.h>
 #include <linux/ktime.h>
 #include <linux/regulator/driver.h>
+#include <linux/regulator/machine.h>
 #include <linux/regmap.h>
 #include <linux/list.h>
 #include <linux/mfd/syscon.h>
@@ -1953,7 +1954,28 @@ static int spmi_regulator_of_parse(struct device_node *node,
 	struct spmi_regulator_init_data data = { };
 	struct spmi_regulator *vreg = config->driver_data;
 	struct device *dev = config->dev;
+	const struct regulation_constraints *constraints = &config->init_data->constraints;
+	const struct spmi_voltage_range *range, *end;
 	int ret;
+
+	if (vreg->set_points->count > 1) {
+		/* Check if we only have one range with constraints applied */
+		range = vreg->set_points->range;
+		end = range + vreg->set_points->count;
+
+		for (; range < end; range++) {
+			if (constraints->min_uV >= range->set_point_min_uV &&
+			    constraints->max_uV <= range->set_point_max_uV) {
+				if (vreg->desc.uV_step) {
+					/* Multiple ranges match */
+					vreg->desc.uV_step = 0;
+					break;
+				}
+
+				vreg->desc.uV_step = range->step_uV;
+			}
+		}
+	}
 
 	spmi_regulator_get_dt_config(vreg, node, &data);
 
