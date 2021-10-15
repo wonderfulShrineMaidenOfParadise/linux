@@ -1747,7 +1747,7 @@ static int cpr_probe(struct platform_device *pdev)
 	 * since it depends on the CPU's OPP table.
 	 */
 	ret = nvmem_cell_read_variable_le_u32(dev, "cpr_fuse_revision", &cpr_rev);
-	if (ret)
+	if (ret && ret != -ENOENT)
 		return ret;
 
 	drv->cpr_fuses = cpr_get_fuses(drv);
