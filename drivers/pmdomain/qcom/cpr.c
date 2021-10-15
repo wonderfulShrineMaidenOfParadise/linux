@@ -1776,8 +1776,10 @@ static int cpr_probe(struct platform_device *pdev)
 	if (!drv->pd.name)
 		return -EINVAL;
 
+#if 0
 	drv->pd.power_off = cpr_power_off;
 	drv->pd.power_on = cpr_power_on;
+#endif
 	drv->pd.set_performance_state = cpr_set_performance_state;
 	drv->pd.attach_dev = cpr_pd_attach_dev;
 
