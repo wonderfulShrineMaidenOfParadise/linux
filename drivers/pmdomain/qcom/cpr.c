@@ -4,7 +4,6 @@
  * Copyright (c) 2019, Linaro Limited
  */
 
-#define DEBUG
 #include <linux/module.h>
 #include <linux/err.h>
 #include <linux/debugfs.h>
@@ -1230,9 +1229,9 @@ static int cpr_corner_init(struct cpr_drv *drv)
 		else if (desc->reduce_to_fuse_uV && fuse->uV < corner->max_uV)
 			corner->max_uV = max(corner->min_uV, fuse->uV);
 
-		dev_dbg(drv->dev, "corner %d: [%d %d %d] quot %d (adjust: %d)\n",
-			i, corner->min_uV, corner->uV, corner->max_uV,
-			fuse->quot - corner->quot_adjust, corner->quot_adjust);
+		dev_dbg(drv->dev, "corner %d: [%d %d %d] quot %d\n", i,
+			corner->min_uV, corner->uV, corner->max_uV,
+			fuse->quot - corner->quot_adjust);
 	}
 
 	return 0;
@@ -1739,8 +1738,6 @@ static int cpr_probe(struct platform_device *pdev)
 	drv->vdd_apc = devm_regulator_get(dev, "vdd-apc");
 	if (IS_ERR(drv->vdd_apc))
 		return PTR_ERR(drv->vdd_apc);
-
-	dev_err(dev, "Step volt: %d\n", regulator_get_linear_step(drv->vdd_apc));
 
 	/*
 	 * Initialize fuse corners, since it simply depends
