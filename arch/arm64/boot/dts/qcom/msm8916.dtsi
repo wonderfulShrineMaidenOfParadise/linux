@@ -278,10 +278,6 @@
 			opp-hz = /bits/ 64 <1209600000>;
 			required-opps = <&rpmpd_opp_super_turbo>, <&cpr_opp8>;
 		};
-		opp-1363200000 {
-			opp-hz = /bits/ 64 <1363200000>;
-			required-opps = <&rpmpd_opp_super_turbo>, <&cpr_opp9>;
-		};
 	};
 
 	firmware {
@@ -2694,10 +2690,6 @@
 				};
 				cpr_opp8: opp8 {
 					opp-level = <8>;
-					qcom,opp-fuse-level = <3>;
-				};
-				cpr_opp9: opp9 {
-					opp-level = <9>;
 					qcom,opp-fuse-level = <3>;
 				};
 			};
