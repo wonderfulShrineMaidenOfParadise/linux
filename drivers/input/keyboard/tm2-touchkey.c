@@ -41,6 +41,7 @@ struct touchkey_variant {
 	u8 cmd_led_off;
 	bool no_reg;
 	bool fixed_regulator;
+	bool tc360_j3;
 };
 
 struct tm2_touchkey_data {
@@ -81,6 +82,15 @@ static const struct touchkey_variant tc360_touchkey_variant = {
 	.fixed_regulator = true,
 	.cmd_led_on = TM2_TOUCHKEY_CMD_LED_ON,
 	.cmd_led_off = TM2_TOUCHKEY_CMD_LED_OFF,
+};
+
+static const struct touchkey_variant tc360_j3_touchkey_variant = {
+	.keycode_reg = 0x00,
+	.base_reg = 0x00,
+	.fixed_regulator = true,
+	.cmd_led_on = TM2_TOUCHKEY_CMD_LED_ON,
+	.cmd_led_off = TM2_TOUCHKEY_CMD_LED_OFF,
+	.tc360_j3 = true,
 };
 
 static int tm2_touchkey_led_brightness_set(struct led_classdev *led_dev,
@@ -148,6 +158,9 @@ static irqreturn_t tm2_touchkey_irq_handler(int irq, void *devid)
 			"failed to read i2c data: %d\n", data);
 		goto out;
 	}
+
+	if (touchkey->variant->tc360_j3 && data >> 4)
+		data = (data >> 4) + 8;
 
 	index = (data & TM2_TOUCHKEY_BIT_KEYCODE) - 1;
 	if (index < 0 || index >= touchkey->num_keycodes) {
@@ -346,6 +359,9 @@ static const struct of_device_id tm2_touchkey_of_match[] = {
 	}, {
 		.compatible = "coreriver,tc360-touchkey",
 		.data = &tc360_touchkey_variant,
+	}, {
+		.compatible = "coreriver,tc360-j3-touchkey",
+		.data = &tc360_j3_touchkey_variant,
 	},
 	{ },
 };
