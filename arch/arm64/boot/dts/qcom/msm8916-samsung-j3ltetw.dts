@@ -83,6 +83,50 @@
 			pinctrl-0 = <&muic_int_default>;
 		};
 	};
+
+	i2c-tkey {
+		compatible = "i2c-gpio";
+		sda-gpios = <&msmgpio 31 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&msmgpio 32 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		/*NOTE For J320P and J320R4 use i2c3 */
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&tkey_i2c_default>;
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		touchkey: touchkey@20 {
+			compatible = "coreriver,tc360-j3-touchkey";
+			reg = <0x20>;
+
+			interrupt-parent = <&msmgpio>;
+			interrupts = <98 IRQ_TYPE_EDGE_RISING>;
+
+			/* vcc/vdd-supply are board-specific */
+			vcc-supply = <&reg_touch_key>;
+			vddio-supply = <&pm8916_l5>;
+
+			linux,keycodes = <KEY_APPSELECT KEY_BACK>;
+
+			pinctrl-names = "default";
+			pinctrl-0 = <&tkey_default>;
+		};
+	};
+
+	reg_touch_key: regulator-touch-key {
+		compatible = "regulator-fixed";
+		regulator-name = "touch_key";
+
+		regulator-min-microvolt = <2200000>;
+		regulator-max-microvolt = <2200000>;
+
+		gpio = <&msmgpio 120 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&tkey_en_default>;
+	};
 };
 
 &blsp_i2c2 {
@@ -352,6 +396,30 @@
 
 	muic_int_default: muic-int-default {
 		pins = "gpio12";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	tkey_default: tkey-default {
+		pins = "gpio98";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	tkey_en_default: tkey-en-default {
+		pins = "gpio120";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	tkey_i2c_default: tkey-i2c-default {
+		pins = "gpio31", "gpio32";
 		function = "gpio";
 
 		drive-strength = <2>;
