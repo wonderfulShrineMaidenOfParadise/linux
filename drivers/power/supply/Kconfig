@@ -1004,4 +1004,12 @@ config FUEL_GAUGE_MM8013
 	  the state of charge, temperature, cycle count, actual and design
 	  capacity, etc.
 
+config FUEL_GAUGE_SM5708
+	tristate "Siliconmitus SM5708 Fuel Gauge support"
+	depends on I2C
+	help
+	  SM5708 is fuel-gauge systems for lithium-ion (Li+) batteries
+	  in handheld and portable equipment. The SM5708 is configured
+	  to operate with a single lithium cell
+
 endif # POWER_SUPPLY
