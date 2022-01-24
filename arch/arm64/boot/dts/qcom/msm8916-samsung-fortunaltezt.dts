@@ -21,3 +21,11 @@
 	compatible = "samsung,fortunaltezt", "qcom,msm8916";
 	chassis-type = "handset";
 };
+
+&st_accel {
+	compatible = "st,lis2hh12";
+	mount-matrix = "1",  "0", "0",
+		       "0", "-1", "0",
+		       "0",  "0", "1";
+	status = "okay";
+};

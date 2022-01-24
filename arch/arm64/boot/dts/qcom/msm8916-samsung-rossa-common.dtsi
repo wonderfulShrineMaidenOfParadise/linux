@@ -21,3 +21,11 @@
 	/* Touchscreen varies depending on model variant */
 	/delete-node/ touchscreen@20;
 };
+
+&st_accel {
+	compatible = "st,lis2hh12";
+	mount-matrix = "1",  "0", "0",
+		       "0", "-1", "0",
+		       "0",  "0", "1";
+	status = "okay";
+};
