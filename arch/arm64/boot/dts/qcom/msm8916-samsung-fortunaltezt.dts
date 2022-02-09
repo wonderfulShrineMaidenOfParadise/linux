@@ -22,8 +22,21 @@
 	chassis-type = "handset";
 };
 
+/* On fortunaltezt backlight is controlled with MIPI DCS commands */
+&clk_pwm {
+	status = "disabled";
+};
+
+&clk_pwm_backlight {
+	status = "disabled";
+};
+
 &i2c_nfc {
 	status = "okay";
+};
+
+&panel {
+	/delete-property/ backlight;
 };
 
 &pn547_nfc {
