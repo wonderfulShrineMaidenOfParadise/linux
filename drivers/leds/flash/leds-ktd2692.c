@@ -16,6 +16,8 @@
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 
+#include <media/v4l2-flash-led-class.h>
+
 /* Value related the movie mode */
 #define KTD2692_MOVIE_MODE_CURRENT_LEVELS	16
 #define KTD2692_MM_TO_FL_RATIO(x)		((x) / 3)
@@ -72,6 +74,9 @@ struct ktd2692_led_config_data {
 };
 
 struct ktd2692_context {
+	struct device *dev;
+	struct v4l2_flash *v4l2_flash;
+
 	/* Related LED Flash class device */
 	struct led_classdev_flash fled_cdev;
 
@@ -84,6 +89,8 @@ struct ktd2692_context {
 
 	enum ktd2692_led_mode mode;
 	enum led_brightness torch_brightness;
+
+	struct device_node *child_node;
 };
 
 static struct ktd2692_context *fled_cdev_to_led(
@@ -244,6 +251,30 @@ static void ktd2692_init_flash_timeout(struct led_classdev_flash *fled_cdev,
 	setting->val = cfg->flash_max_timeout;
 }
 
+#if IS_ENABLED(CONFIG_V4L2_FLASH_LED_CLASS)
+static void ktd2692_init_v4l2_flash_config(struct ktd2692_context *led,
+					struct v4l2_flash_config *v4l2_sd_cfg)
+{
+	struct led_flash_setting *s;
+
+	strscpy(v4l2_sd_cfg->dev_name, led->dev->kobj.name,
+		sizeof(v4l2_sd_cfg->dev_name));
+
+	/* Init flash intensity setting */
+	s = &v4l2_sd_cfg->intensity;
+	s->min = 0;
+	s->max = KTD2692_FLASH_MODE_TIMEOUT_LEVELS;
+	s->step = 1;
+	s->val = 1;
+}
+
+#else
+static void ktd2692_init_v4l2_flash_config(struct ktd2692_led_config_data *cfg,
+					struct v4l2_flash_config *v4l2_sd_cfg)
+{
+}
+#endif
+
 static void ktd2692_setup(struct ktd2692_context *led)
 {
 	led->mode = KTD2692_MODE_DISABLE;
@@ -271,7 +302,6 @@ static int ktd2692_parse_dt(struct ktd2692_context *led, struct device *dev,
 			    struct ktd2692_led_config_data *cfg)
 {
 	struct device_node *np = dev_of_node(dev);
-	struct device_node *child_node;
 	int ret;
 
 	if (!np)
@@ -302,30 +332,30 @@ static int ktd2692_parse_dt(struct ktd2692_context *led, struct device *dev,
 		}
 	}
 
-	child_node = of_get_next_available_child(np, NULL);
-	if (!child_node) {
+	led->child_node = of_get_next_available_child(np, NULL);
+	if (!led->child_node) {
 		dev_err(dev, "No DT child node found for connected LED.\n");
 		return -EINVAL;
 	}
 
 	led->fled_cdev.led_cdev.name =
-		of_get_property(child_node, "label", NULL) ? : child_node->name;
+		of_get_property(led->child_node, "label", NULL) ? : led->child_node->name;
 
-	ret = of_property_read_u32(child_node, "led-max-microamp",
+	ret = of_property_read_u32(led->child_node, "led-max-microamp",
 				   &cfg->movie_max_microamp);
 	if (ret) {
 		dev_err(dev, "failed to parse led-max-microamp\n");
 		goto err_parse_dt;
 	}
 
-	ret = of_property_read_u32(child_node, "flash-max-microamp",
+	ret = of_property_read_u32(led->child_node, "flash-max-microamp",
 				   &cfg->flash_max_microamp);
 	if (ret) {
 		dev_err(dev, "failed to parse flash-max-microamp\n");
 		goto err_parse_dt;
 	}
 
-	ret = of_property_read_u32(child_node, "flash-max-timeout-us",
+	ret = of_property_read_u32(led->child_node, "flash-max-timeout-us",
 				   &cfg->flash_max_timeout);
 	if (ret) {
 		dev_err(dev, "failed to parse flash-max-timeout-us\n");
@@ -333,7 +363,7 @@ static int ktd2692_parse_dt(struct ktd2692_context *led, struct device *dev,
 	}
 
 err_parse_dt:
-	of_node_put(child_node);
+	of_node_put(led->child_node);
 	return ret;
 }
 
@@ -347,19 +377,24 @@ static int ktd2692_probe(struct platform_device *pdev)
 	struct ktd2692_context *led;
 	struct led_classdev *led_cdev;
 	struct led_classdev_flash *fled_cdev;
+	struct led_init_data init_data = {};
 	struct ktd2692_led_config_data led_cfg;
+	struct v4l2_flash_config v4l2_sd_cfg = {};
 	int ret;
 
 	led = devm_kzalloc(&pdev->dev, sizeof(*led), GFP_KERNEL);
 	if (!led)
 		return -ENOMEM;
 
+	led->dev = &pdev->dev;
 	fled_cdev = &led->fled_cdev;
 	led_cdev = &fled_cdev->led_cdev;
 
 	ret = ktd2692_parse_dt(led, &pdev->dev, &led_cfg);
 	if (ret)
 		return ret;
+
+	init_data.fwnode = &led->child_node->fwnode;
 
 	ktd2692_init_flash_timeout(fled_cdev, &led_cfg);
 	ktd2692_init_movie_current_max(&led_cfg);
@@ -374,7 +409,7 @@ static int ktd2692_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, led);
 
-	ret = led_classdev_flash_register(&pdev->dev, fled_cdev);
+	ret = devm_led_classdev_flash_register_ext(&pdev->dev, fled_cdev, &init_data);
 	if (ret) {
 		dev_err(&pdev->dev, "can't register LED %s\n", led_cdev->name);
 		mutex_destroy(&led->lock);
@@ -382,6 +417,16 @@ static int ktd2692_probe(struct platform_device *pdev)
 	}
 
 	ktd2692_setup(led);
+
+	ktd2692_init_v4l2_flash_config(led, &v4l2_sd_cfg);
+
+	led->v4l2_flash = v4l2_flash_init(&pdev->dev, &led->child_node->fwnode, fled_cdev, NULL, &v4l2_sd_cfg);
+
+	if (IS_ERR(led->v4l2_flash)) {
+		ret = PTR_ERR(led->v4l2_flash);
+		dev_err(&pdev->dev, "error initializing v4l2 flash: %d\n", ret);
+		return ret;
+	}
 
 	return 0;
 }
@@ -391,6 +436,7 @@ static void ktd2692_remove(struct platform_device *pdev)
 	struct ktd2692_context *led = platform_get_drvdata(pdev);
 
 	led_classdev_flash_unregister(&led->fled_cdev);
+	v4l2_flash_release(led->v4l2_flash);
 
 	mutex_destroy(&led->lock);
 }
