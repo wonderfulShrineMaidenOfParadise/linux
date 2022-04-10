@@ -1678,7 +1678,7 @@ static int ccs_power_on(struct device *dev)
 out_cci_addr_fail:
 	gpiod_set_value(sensor->reset, 1);
 	gpiod_set_value(sensor->xshutdown, 0);
-	clk_disable_unprepare(sensor->ext_clk);
+	//clk_disable_unprepare(sensor->ext_clk);
 
 out_xclk_fail:
 	regulator_bulk_disable(ARRAY_SIZE(ccs_regulators),
@@ -1704,12 +1704,12 @@ static int ccs_power_off(struct device *dev)
 	if (sensor->hwcfg.i2c_addr_alt)
 		ccs_write(sensor, SOFTWARE_RESET, CCS_SOFTWARE_RESET_ON);
 
-	gpiod_set_value(sensor->reset, 1);
-	gpiod_set_value(sensor->xshutdown, 0);
-	clk_disable_unprepare(sensor->ext_clk);
+	//gpiod_set_value(sensor->reset, 1);
+	//gpiod_set_value(sensor->xshutdown, 0);
+	//clk_disable_unprepare(sensor->ext_clk);
 	usleep_range(5000, 5000);
-	regulator_bulk_disable(ARRAY_SIZE(ccs_regulators),
-			       sensor->regulators);
+	//regulator_bulk_disable(ARRAY_SIZE(ccs_regulators),
+	//		       sensor->regulators);
 	sensor->streaming = false;
 
 	return 0;
@@ -3217,6 +3217,8 @@ static int ccs_probe(struct i2c_client *client)
 	unsigned int i;
 	int rval;
 
+	dev_err(&client->dev, "PROBE START\n");
+
 	sensor = devm_kzalloc(&client->dev, sizeof(*sensor), GFP_KERNEL);
 	if (sensor == NULL)
 		return -ENOMEM;
@@ -3275,7 +3277,6 @@ static int ccs_probe(struct i2c_client *client)
 				dev_err(&client->dev,
 					"can't set clock freq, asked for %u but got %lu\n",
 					sensor->hwcfg.ext_clk, rate);
-				return -EINVAL;
 			}
 		} else {
 			sensor->hwcfg.ext_clk = clk_get_rate(sensor->ext_clk);
@@ -3578,6 +3579,8 @@ out_free_ccs_limits:
 out_power_off:
 	ccs_power_off(&client->dev);
 	mutex_destroy(&sensor->mutex);
+
+	dev_err(&client->dev, "PROBE END\n");
 
 	return rval;
 }
