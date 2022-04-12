@@ -10,6 +10,7 @@ shark2-objs := radio-shark2.o radio-tea5777.o
 obj-$(CONFIG_RADIO_AZTECH) += radio-aztech.o
 obj-$(CONFIG_RADIO_CADET) += radio-cadet.o
 obj-$(CONFIG_RADIO_GEMTEK) += radio-gemtek.o
+obj-$(CONFIG_RADIO_IRIS) += radio-iris.o
 obj-$(CONFIG_RADIO_ISA) += radio-isa.o
 obj-$(CONFIG_RADIO_MAXIRADIO) += radio-maxiradio.o
 obj-$(CONFIG_RADIO_MIROPCM20) += radio-miropcm20.o
