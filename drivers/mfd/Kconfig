@@ -1335,6 +1335,19 @@ config MFD_SM501
 	  interface. The device may be connected by PCI or local bus with
 	  varying functions enabled.
 
+config MFD_SM5703
+	tristate "Silicon Mitus SM5703 MFD"
+	depends on I2C
+	depends on OF
+	select MFD_CORE
+	select REGMAP_I2C
+	help
+	  This is the core driver for the Silicon Mitus SM5703 multi-function
+	  device. This device is meant to be used in phones and it has numerous
+	  modules, including LED controller, regulators, fuel gauge, MUIC and
+	  charger circuit. It also support muxing a serial interface over USB
+	  data lines.
+
 config MFD_SM501_GPIO
 	bool "Export GPIO via GPIO layer"
 	depends on MFD_SM501 && GPIOLIB
