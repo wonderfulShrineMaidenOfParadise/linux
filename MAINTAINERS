@@ -20148,6 +20148,14 @@ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/paulmck/linux-rcu.git dev
 F:	include/linux/srcu*.h
 F:	kernel/rcu/srcu*.c
 
+SM5703 MFD DRIVER
+M:	Markuss Broks <markuss.broks@gmail.com>
+S:	Maintained
+F:	Documentation/devicetree/bindings/mfd/siliconmitus,sm5703.yaml
+F:	Documentation/devicetree/bindings/regulator/siliconmitus,sm5703-regulator.yaml
+F:	drivers/mfd/sm5703.c
+F:	drivers/regulator/sm5703-regulator.c
+
 SMACK SECURITY MODULE
 M:	Casey Schaufler <casey@schaufler-ca.com>
 L:	linux-security-module@vger.kernel.org
