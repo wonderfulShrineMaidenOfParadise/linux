@@ -48,6 +48,9 @@
 			enable-method = "qcom,msm8909-smp";
 			clocks = <&apcs>;
 			#cooling-cells = <2>;
+			power-domains = <&rpmpd MSM8909_VDDCX_AO>;
+			power-domain-names = "apc";
+			operating-points-v2 = <&cpu_opp_table>;
 			cpu-idle-states = <&CPU_SLEEP_0>;
 			qcom,acc = <&cpu0_acc>;
 			qcom,saw = <&cpu0_saw>;
@@ -61,6 +64,9 @@
 			enable-method = "qcom,msm8909-smp";
 			clocks = <&apcs>;
 			#cooling-cells = <2>;
+			power-domains = <&rpmpd MSM8909_VDDCX_AO>;
+			power-domain-names = "apc";
+			operating-points-v2 = <&cpu_opp_table>;
 			cpu-idle-states = <&CPU_SLEEP_0>;
 			qcom,acc = <&cpu1_acc>;
 			qcom,saw = <&cpu1_saw>;
@@ -74,6 +80,9 @@
 			enable-method = "qcom,msm8909-smp";
 			clocks = <&apcs>;
 			#cooling-cells = <2>;
+			power-domains = <&rpmpd MSM8909_VDDCX_AO>;
+			power-domain-names = "apc";
+			operating-points-v2 = <&cpu_opp_table>;
 			cpu-idle-states = <&CPU_SLEEP_0>;
 			qcom,acc = <&cpu2_acc>;
 			qcom,saw = <&cpu2_saw>;
@@ -87,6 +96,9 @@
 			enable-method = "qcom,msm8909-smp";
 			clocks = <&apcs>;
 			#cooling-cells = <2>;
+			power-domains = <&rpmpd MSM8909_VDDCX_AO>;
+			power-domain-names = "apc";
+			operating-points-v2 = <&cpu_opp_table>;
 			cpu-idle-states = <&CPU_SLEEP_0>;
 			qcom,acc = <&cpu3_acc>;
 			qcom,saw = <&cpu3_saw>;
@@ -106,6 +118,59 @@
 				min-residency-us = <1260>;
 				local-timer-stop;
 			};
+		};
+	};
+
+	cpu_opp_table: cpu-opp-table {
+		compatible = "operating-points-v2-kryo-cpu", "operating-points-v2";
+		nvmem-cells = <&cpu_speedbin>;
+		opp-shared;
+
+		/*
+		 * The lower CPU frequencies are meant to be 200, 400, 533 and
+		 * 800 MHz. However, they are generated from GPLL0 which does
+		 * not run at exactly 800 MHz but rather 799999804 Hz.
+		 */
+		opp-199999951 {
+			opp-hz = /bits/ 64 <199999951>;
+			required-opps = <&rpmpd_opp_ret>;
+			opp-supported-hw = <0xff>;
+		};
+		opp-399999902 {
+			opp-hz = /bits/ 64 <399999902>;
+			required-opps = <&rpmpd_opp_svs_soc>;
+			opp-supported-hw = <0xff>;
+		};
+		opp-533333202 {
+			opp-hz = /bits/ 64 <533333202>;
+			required-opps = <&rpmpd_opp_svs_soc>;
+			opp-supported-hw = <0xff>;
+		};
+		opp-799999804 {
+			opp-hz = /bits/ 64 <799999804>;
+			required-opps = <&rpmpd_opp_nom>;
+			opp-supported-hw = <0xff>;
+		};
+		/* Higher CPU frequencies are generated with the A7PLL */
+		opp-998400000 {
+			opp-hz = /bits/ 64 <998400000>;
+			required-opps = <&rpmpd_opp_nom>;
+			opp-supported-hw = <0x5>;
+		};
+		opp-1094400000 {
+			opp-hz = /bits/ 64 <1094400000>;
+			required-opps = <&rpmpd_opp_super_turbo>;
+			opp-supported-hw = <0x5>;
+		};
+		opp-1248000000 {
+			opp-hz = /bits/ 64 <1248000000>;
+			required-opps = <&rpmpd_opp_super_turbo>;
+			opp-supported-hw = <0x1>;
+		};
+		opp-1267200000 {
+			opp-hz = /bits/ 64 <1267200000>;
+			required-opps = <&rpmpd_opp_super_turbo>;
+			opp-supported-hw = <0x1>;
 		};
 	};
 
@@ -329,6 +394,11 @@
 			reg = <0x0005c000 0x1000>;
 			#address-cells = <1>;
 			#size-cells = <1>;
+
+			cpu_speedbin: speedbin@c {
+				reg = <0x0c 0x1>;
+				bits = <2 3>;
+			};
 
 			tsens_s0_p1: s0-p1@a0 {
 				reg = <0xa0 0x1>;
@@ -1288,10 +1358,10 @@
 					opp-hz = /bits/ 64 <1190400000>;
 				};
 				opp-1248000000 {
-					opp-hz = /bits/ 64 <1267200000>;
+					opp-hz = /bits/ 64 <1248000000>;
 				};
-				opp-1305600000 {
-					opp-hz = /bits/ 64 <1305600000>;
+				opp-1267200000 {
+					opp-hz = /bits/ 64 <1267200000>;
 				};
 			};
 		};
