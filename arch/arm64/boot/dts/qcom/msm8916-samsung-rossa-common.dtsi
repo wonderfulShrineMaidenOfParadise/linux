@@ -22,6 +22,14 @@
 	/delete-node/ touchscreen@20;
 };
 
+&i2c_nfc {
+	status = "okay";
+};
+
+&s3fwrn5_nfc {
+	status = "okay";
+};
+
 &st_accel {
 	compatible = "st,lis2hh12";
 	mount-matrix = "1",  "0", "0",
