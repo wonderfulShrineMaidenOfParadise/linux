@@ -12,6 +12,11 @@
 
 static const struct mfd_cell sm5703_devs[] = {
 	{ .name = "sm5703-regulator", },
+	{ .name = "sm5703-charger", },
+	{
+		.name = "sm5703-flash",
+		.of_compatible = "siliconmitus,sm5703-flash",
+	},
 };
 
 static const struct regmap_config sm5703_regmap_config = {
