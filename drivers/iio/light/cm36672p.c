@@ -41,6 +41,14 @@
 #define CM36672P_DEFAULT_CONF3		0x4000
 #define CM36672P_DEFAULT_TRIM		0x0000
 
+#define CM36686_DEFAULT_HI_THD		0x0015
+#define CM36686_DEFAULT_LOW_THD		0x000f
+#define CM36686_CANCEL_HI_THD		0x000f
+#define CM36686_CANCEL_LOW_THD		0x000a
+#define CM36686_DEFAULT_CONF1		0x03A4
+#define CM36686_DEFAULT_CONF3		0x4210
+#define CM36686_DEFAULT_TRIM		0x0005
+
 #define DEFAULT_CONF3_SMART_PERS	0x4010
 
 #define CM36672P_CMD_READ_RAW_PROXIMITY	0x01
@@ -370,8 +378,19 @@ static const struct cm366xx_properties cm36672p_data = {
 	.default_trim = CM36672P_DEFAULT_TRIM,
 };
 
+static const struct cm366xx_properties cm36686_data = {
+	.default_hi_thd = CM36686_DEFAULT_HI_THD,
+	.default_low_thd = CM36686_DEFAULT_LOW_THD,
+	.cancel_hi_thd = CM36686_CANCEL_HI_THD,
+	.cancel_low_thd = CM36686_CANCEL_LOW_THD,
+	.default_conf1 = CM36686_DEFAULT_CONF1,
+	.default_conf3 = CM36686_DEFAULT_CONF3,
+	.default_trim = CM36686_DEFAULT_TRIM,
+};
+
 static const struct of_device_id cm36672p_of_match[] = {
 	{ .compatible = "capella,cm36672p", .data = &cm36672p_data},
+	{ .compatible = "capella,cm36686", .data = &cm36686_data},
 	{},
 };
 
