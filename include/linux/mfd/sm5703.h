@@ -102,4 +102,7 @@ struct sm5703_dev {
 #define SM5703_STATUS5_VBUSUVLO			0x40
 #define SM5703_STATUS5_VBUSOK			0x20
 
+#define SM5703_AUTOSET_MASK			(1 << 4)
+#define SM5703_AUTOSTOP_MASK			(1 << 7)
+
 #endif
