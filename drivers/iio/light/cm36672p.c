@@ -41,6 +41,13 @@
 #define CM36672P_DEFAULT_CONF3		0x4000
 #define CM36672P_DEFAULT_TRIM		0x0000
 
+#define CM36672P_J3_DEFAULT_HI_THD	0x0022
+#define CM36672P_J3_DEFAULT_LOW_THD	0x001e
+#define CM36672P_J3_CANCEL_HI_THD	0x0022
+#define CM36672P_J3_CANCEL_LOW_THD	0x001e
+#define CM36672P_J3_DEFAULT_CONF1	0x03a0
+#define CM36672P_J3_DEFAULT_CONF3	0x4200
+
 #define CM36686_DEFAULT_HI_THD		0x0015
 #define CM36686_DEFAULT_LOW_THD		0x000f
 #define CM36686_CANCEL_HI_THD		0x000f
@@ -89,6 +96,12 @@ struct cm36672p_data {
 	struct regulator_bulk_data supplies[3];
 	bool smart_pers;
 	const struct cm366xx_properties *data;
+	unsigned int default_hi_thd;
+	unsigned int default_low_thd;
+	unsigned int cancel_hi_thd;
+	unsigned int cancel_low_thd;
+	unsigned int ps_it;
+	unsigned int led_current;
 };
 
 static int cm36672p_read_raw(struct iio_dev *iio_dev,
@@ -138,7 +151,7 @@ irqreturn_t cm36672p_irq_handler(int irq, void *data)
 	int ret;
 
 	/* the act of reading this register out acks the interrupt */
-	ret = regmap_read(cm36672p->regmap, REG_INT_FLAG, &int_flag);
+	ret = regmap_read(cm36672p->regmap, REG_PS_DATA, &int_flag);
 	if (ret < 0) {
 		dev_err(dev, "irq: failed to read interrupt flag: %d\n", ret);
 		return ret;
@@ -173,7 +186,7 @@ static int cm36672p_setup_reg(struct cm36672p_data *cm36672p)
 
 	/* PS initialization */
 	ret = regmap_write(cm36672p->regmap, REG_PS_CONF1,
-			   cm36672p->data->default_conf1);
+			   cm36672p->data->default_conf1 | cm36672p->ps_it);
 	if (ret < 0) {
 		dev_err(dev, "PS_CONF1 register setup failed: %d\n", ret);
 		return ret;
@@ -181,10 +194,10 @@ static int cm36672p_setup_reg(struct cm36672p_data *cm36672p)
 
 	if (cm36672p->smart_pers)
 		ret = regmap_write(cm36672p->regmap, REG_PS_CONF3,
-				   DEFAULT_CONF3_SMART_PERS);
+				   DEFAULT_CONF3_SMART_PERS | cm36672p->led_current);
 	else
 		ret = regmap_write(cm36672p->regmap, REG_PS_CONF3,
-				   cm36672p->data->default_conf3);
+				   cm36672p->data->default_conf3 | cm36672p->led_current);
 
 	if (ret < 0) {
 		dev_err(dev, "PS_CONF3 register setup failed: %d\n", ret);
@@ -192,7 +205,7 @@ static int cm36672p_setup_reg(struct cm36672p_data *cm36672p)
 	}
 
 	ret = regmap_write(cm36672p->regmap, REG_PS_THD_HIGH,
-			   cm36672p->data->default_hi_thd);
+			   cm36672p->default_hi_thd);
 	if (ret < 0) {
 		dev_err(dev,
 			"proximity sensor treshold high setup failed: %d\n",
@@ -201,7 +214,7 @@ static int cm36672p_setup_reg(struct cm36672p_data *cm36672p)
 	}
 
 	ret = regmap_write(cm36672p->regmap, REG_PS_THD_LOW,
-			   cm36672p->data->default_low_thd);
+			   cm36672p->default_low_thd);
 	if (ret < 0) {
 		dev_err(dev, "proximity sensor treshold low setup failed: %d\n",
 			ret);
@@ -318,6 +331,26 @@ static int cm36672p_i2c_probe(struct i2c_client *client,
 	cm36672p->smart_pers = of_property_read_bool(dev->of_node,
 						     "cm36672p,smart-pers");
 
+	/* FIXME NULL POINTER */
+	ret = of_property_read_u32(dev->of_node, "cm36672p,default_hi_thd", &cm36672p->default_hi_thd);
+	if (ret < 0)
+		cm36672p->default_hi_thd = cm36672p->data->default_hi_thd;
+
+	ret = of_property_read_u32(dev->of_node, "cm36672p,default_low_thd", &cm36672p->default_low_thd);
+	if (ret < 0)
+		cm36672p->default_low_thd = cm36672p->data->default_low_thd;
+
+	ret = of_property_read_u32(dev->of_node, "cm36672p,cancel_hi_thd", &cm36672p->cancel_hi_thd);
+	if (ret < 0)
+		cm36672p->cancel_hi_thd = cm36672p->data->cancel_hi_thd;
+
+	ret = of_property_read_u32(dev->of_node, "cm36672p,cancel_low_thd", &cm36672p->cancel_low_thd);
+	if (ret < 0)
+		cm36672p->cancel_low_thd = cm36672p->data->cancel_low_thd;
+
+	ret = of_property_read_u32(dev->of_node, "cm36672p,ps_it", &cm36672p->ps_it);
+	ret = of_property_read_u32(dev->of_node, "cm36672p,led_current", &cm36672p->led_current);
+
 	cm36672p->regmap = devm_regmap_init_i2c(client,
 						&cm36672p_regmap_config);
 	if (IS_ERR(cm36672p->regmap))
@@ -378,6 +411,16 @@ static const struct cm366xx_properties cm36672p_data = {
 	.default_trim = CM36672P_DEFAULT_TRIM,
 };
 
+static const struct cm366xx_properties cm36672p_j3_data = {
+	.default_hi_thd = CM36672P_J3_DEFAULT_HI_THD,
+	.default_low_thd = CM36672P_J3_DEFAULT_LOW_THD,
+	.cancel_hi_thd = CM36672P_J3_CANCEL_HI_THD,
+	.cancel_low_thd = CM36672P_J3_CANCEL_LOW_THD,
+	.default_conf1 = CM36672P_J3_DEFAULT_CONF1,
+	.default_conf3 = CM36672P_J3_DEFAULT_CONF3,
+	.default_trim = CM36672P_DEFAULT_TRIM,
+};
+
 static const struct cm366xx_properties cm36686_data = {
 	.default_hi_thd = CM36686_DEFAULT_HI_THD,
 	.default_low_thd = CM36686_DEFAULT_LOW_THD,
@@ -390,6 +433,7 @@ static const struct cm366xx_properties cm36686_data = {
 
 static const struct of_device_id cm36672p_of_match[] = {
 	{ .compatible = "capella,cm36672p", .data = &cm36672p_data},
+	{ .compatible = "capella,cm36672p-j3", .data = &cm36672p_j3_data},
 	{ .compatible = "capella,cm36686", .data = &cm36686_data},
 	{},
 };

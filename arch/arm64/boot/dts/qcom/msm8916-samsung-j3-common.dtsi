@@ -56,8 +56,15 @@
 
 &i2c_sensors {
 	proximity@60 {
-		compatible = "capella,cm36672p";
+		compatible = "capella,cm36672p-j3";
 		reg = <0x60>;
+
+		cm36672p,default_hi_thd = <0x15>;
+		cm36672p,default_low_thd = <0xf>;
+		cm36672p,cancel_hi_thd = <0xa>;
+		cm36672p,cancel_low_thd = <0x7>;
+		cm36672p,ps_it = <0x4>;
+		cm36672p,led_current = <0x5>;
 
 		interrupt-parent = <&tlmm>;
 		interrupts = <113 IRQ_TYPE_EDGE_FALLING>;
