@@ -51,6 +51,15 @@
 	ctrl-gpios = <&tlmm 85 GPIO_ACTIVE_HIGH>;
 };
 
+&fuel_gauge {
+	interrupts = <21 IRQ_TYPE_EDGE_FALLING>;
+};
+
+&i2c_fg {
+	sda-gpios = <&tlmm 16 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	scl-gpios = <&tlmm 17 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+};
+
 &muic {
 	interrupts = <121 IRQ_TYPE_EDGE_FALLING>;
 };
@@ -98,6 +107,14 @@
 
 &accel_int_default {
 	pins = "gpio49";
+};
+
+&fg_alert_default {
+	pins = "gpio21";
+};
+
+&fg_i2c_default {
+	pins = "gpio16", "gpio17";
 };
 
 &lcd_1p8_ldo_en_default {
