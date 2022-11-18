@@ -8,11 +8,103 @@
 	model = "Samsung Galaxy J5 (2015)";
 	compatible = "samsung,j5", "qcom,msm8916";
 	chassis-type = "handset";
+
+	reg_camera_core: regulator-core-supply {
+		compatible = "regulator-fixed";
+		regulator-name = "regulator-camera-core";
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1200000>;
+
+		vin-supply = <&sm5703_buck>;
+
+		gpio = <&tlmm 33 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-always-on;
+
+		pinctrl-0 = <&camera_front_default>;
+		pinctrl-names = "default";
+	};
 };
 
 &accelerometer {
 	vdd-supply = <&pm8916_l5>;
 	vddio-supply = <&pm8916_l5>;
+};
+
+&camss {
+	status = "okay";
+
+	ports {
+		port@0 {
+			reg = <0>;
+			csiphy0_ep: endpoint {
+				clock-lanes = <1>;
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&ccs_ep_b>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			csiphy1_ep: endpoint {
+				clock-lanes = <1>;
+				data-lanes = <0 1>;
+				remote-endpoint = <&ccs_ep_f>;
+			};
+		};
+	};
+};
+
+&cci {
+	status = "okay";
+};
+
+// link-freq = width * height * bpp * fps / (2 * nlanes)
+
+&cci_i2c0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	camera-sensor-back@11 {
+		reg = <0x11>;
+		compatible = "mipi-ccs-1.0", "mipi-ccs";
+		vio-supply = <&pm8916_l16>;
+		vana-supply = <&sm5703_ldo1>;
+		vcore-supply = <&reg_camera_core>;
+		reset-gpios = <&tlmm 35 GPIO_ACTIVE_LOW>;
+		clocks = <&gcc GCC_CAMSS_MCLK0_CLK>;
+		clock-frequency = <23880000>;
+		pinctrl-0 = <&camera_rear_default>;
+		pinctrl-names = "default";
+		port {
+			ccs_ep_b: endpoint {
+				data-lanes = <0 1 2 3>;
+				bus-type = <4>;
+				remote-endpoint = <&csiphy0_ep>;
+				link-frequencies = /bits/ 64 <146000000>;
+			};
+		};
+	};
+
+	camera-sensor-front@10 {
+		reg = <0x10>;
+		compatible = "mipi-ccs-1.0", "mipi-ccs";
+		vio-supply = <&pm8916_l16>;
+		vana-supply = <&sm5703_ldo1>;
+		vcore-supply = <&reg_camera_core>;
+		reset-gpios = <&tlmm 28 GPIO_ACTIVE_LOW>;
+		clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
+		clock-frequency = <23880000>;
+		pinctrl-0 = <&camera_front_default>;
+		pinctrl-names = "default";
+		port {
+			ccs_ep_f: endpoint {
+				data-lanes = <0 1>;
+				bus-type = <4>;
+				remote-endpoint = <&csiphy1_ep>; // 146MHz
+				link-frequencies = /bits/ 64 <1086324736>;
+			};
+		};
+	};
 };
 
 &front_flash_led {
