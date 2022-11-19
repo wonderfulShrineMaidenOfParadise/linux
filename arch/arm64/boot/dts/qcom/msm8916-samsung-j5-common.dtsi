@@ -544,6 +544,13 @@
 		bias-disable;
 	};
 
+	proxy_int_default: proxy-int-default-state {
+		pins = "gpio113";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
 	sensors_i2c_default: sensors-i2c-default-state {
 		pins = "gpio31", "gpio32";
 		function = "gpio";
