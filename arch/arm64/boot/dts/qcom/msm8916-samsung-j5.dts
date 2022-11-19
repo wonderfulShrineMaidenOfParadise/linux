@@ -24,6 +24,19 @@
 		pinctrl-0 = <&camera_front_default>;
 		pinctrl-names = "default";
 	};
+
+	reg_vdd_proxy: regulator-vdd-proximity {
+		compatible = "regulator-fixed";
+		regulator-name = "proximity_led";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+
+		gpio = <&tlmm 73 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+
+		pinctrl-0 = <&proxy_ldo_en_default>;
+		pinctrl-names = "default";
+	};
 };
 
 &accelerometer {
@@ -111,6 +124,22 @@
 	ctrl-gpios = <&tlmm 50 GPIO_ACTIVE_HIGH>;
 };
 
+&i2c_sensors {
+	proximity-sensor@44 {
+		compatible = "sharp,gp2ap002s00f";
+		reg = <0x44>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <113 IRQ_TYPE_EDGE_FALLING>;
+		vdd-supply = <&pm8916_l17>;
+		vio-supply = <&pm8916_l5>;
+		sharp,proximity-far-hysteresis = /bits/ 8 <0x2f>;
+		sharp,proximity-close-hysteresis = /bits/ 8 <0x0f>;
+
+		pinctrl-0 = <&proxy_int_default>;
+		pinctrl-names = "default";
+	};
+};
+
 &panel {
 	vdd3-supply = <&reg_vdd_lcd_1p8>;
 	vci-supply = <&pm8916_l17>;
@@ -134,6 +163,15 @@
 
 &usb_hs_phy {
 	qcom,init-seq = /bits/ 8 <0x1 0x19 0x2 0x0b>;
+};
+
+&tlmm {
+	proxy_ldo_en_default: proxy-ldo-en-default-state {
+		pins = "gpio73";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
 };
 
 &lcd_1p8_ldo_en_default {
