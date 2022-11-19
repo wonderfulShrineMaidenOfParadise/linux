@@ -49,6 +49,34 @@
 	};
 };
 
+&blsp_i2c4 {
+	status = "okay";
+
+	proximity@28 {
+		compatible = "semtech,sx9310";
+		reg = <0x28>;
+		#io-channel-cells = <1>;
+
+		pinctrl-0 = <&grip_sensor_int_default>;
+		pinctrl-names = "default";
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <51 IRQ_TYPE_LEVEL_LOW>;
+
+		vdd-supply = <&pm8916_l17>;
+		svdd-supply = <&pm8916_l5>;
+		vddio-supply = <&pm8916_l5>;
+
+		semtech,cs0-ground;
+		semtech,combined-sensors = <0 1>;
+		semtech,resolution = "fine";
+		semtech,proxraw-strength = <8>;
+		semtech,avg-pos-strength = <1024>;
+
+		label = "proximity-wifi";
+	};
+};
+
 &accelerometer {
 	interrupts-extended = <&tlmm 49 IRQ_TYPE_LEVEL_HIGH>;
 
@@ -122,6 +150,13 @@
 };
 
 &tlmm {
+	grip_sensor_int_default: grip-sensor-int-default-state {
+		pins = "gpio51";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
 	lcd_3p0_ldo_en_default: lcd-3p0-ldo-en-default-state {
 		pins = "gpio115";
 		function = "gpio";
