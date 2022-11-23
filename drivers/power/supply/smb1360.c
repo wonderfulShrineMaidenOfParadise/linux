@@ -261,7 +261,8 @@
 #define MIN_RECHG_MV			50
 #define MAX_RECHG_MV			300
 
-#define SMB1360_FG_ACCESS_TIMEOUT_MS	15000
+#define SMB1360_FG_ACCESS_RETRY_COUNT	3
+#define SMB1360_FG_ACCESS_TIMEOUT_MS	5000
 #define SMB1360_POWERON_DELAY_MS	2000
 #define SMB1360_FG_RESET_DELAY_MS	1500
 
@@ -732,7 +733,7 @@ static int smb1360_register_vbus_regulator(struct smb1360 *smb)
 static int smb1360_enable_fg_access(struct smb1360 *smb)
 {
 	unsigned int reg;
-	int ret;
+	int ret, retry = SMB1360_FG_ACCESS_RETRY_COUNT;
 
 	ret = regmap_read(smb->regmap, IRQ_I_REG, &reg);
 	if (ret || reg & IRQ_I_FG_ACCESS_ALLOWED_BIT)
@@ -743,17 +744,21 @@ static int smb1360_enable_fg_access(struct smb1360 *smb)
 	if (ret)
 		goto err;
 
-	ret = wait_for_completion_timeout(&smb->fg_mem_access_granted,
-					  msecs_to_jiffies(SMB1360_FG_ACCESS_TIMEOUT_MS));
+	do {
+		ret = wait_for_completion_timeout(&smb->fg_mem_access_granted,
+						  msecs_to_jiffies(SMB1360_FG_ACCESS_TIMEOUT_MS));
 
-	if (ret == 0) {
+		if (ret <= 0) {
+			continue;
+		}
+		return 0;
+	} while (--retry);
+
+	if (ret < 0) {
 		/* Clear the FG access bit if request failed */
 		dev_err(smb->dev, "enable FG access timed out\n");
 		regmap_clear_bits(smb->regmap, CMD_I2C_REG, FG_ACCESS_ENABLED_BIT);
-		return -ETIMEDOUT;
 	}
-
-	return 0;
 
 err:
 	dev_err(smb->dev, "failed to enable fg access: %d\n", ret);
