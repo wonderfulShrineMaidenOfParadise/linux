@@ -1230,7 +1230,7 @@ static void smb1360_delayed_init_work_fn(struct work_struct *work)
 		ret = smb1360_force_fg_reset(smb);
 		if (ret)
 			return;
-		schedule_delayed_work(&smb->delayed_init_work, 0);
+		// schedule_delayed_work(&smb->delayed_init_work, 0);
 	}
 }
 
