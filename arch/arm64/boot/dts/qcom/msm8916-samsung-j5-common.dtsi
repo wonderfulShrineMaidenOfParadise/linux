@@ -220,6 +220,81 @@
 	};
 };
 
+&blsp_i2c6 {
+	status = "okay";
+
+	mfd@49 {
+		compatible = "siliconmitus,sm5703";
+		reg = <0x49>;
+
+		reset-gpio = <&tlmm 24 GPIO_ACTIVE_HIGH>;
+
+		pinctrl-0 = <&mrstb_default>;
+		pinctrl-names = "default";
+
+		regulators {
+			sm5703_ldo1: ldo1 {
+				regulator-name = "sm5703_ldo1";
+				regulator-min-microvolt = <2800000>;
+				regulator-max-microvolt = <2800000>;
+			};
+
+			sm5703_ldo2: ldo2 {
+				regulator-name = "sm5703_ldo2";
+				regulator-min-microvolt = <1500000>;
+				regulator-max-microvolt = <3300000>;
+			};
+
+			sm5703_ldo3: ldo3 {
+				regulator-name = "sm5703_ldo3";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+			};
+
+			sm5703_usbldo1: usbldo1 {
+				regulator-name = "sm5703_usbldo1";
+			};
+
+			sm5703_usbldo2: usbldo2 {
+				regulator-name = "sm5703_usbldo2";
+			};
+
+			sm5703_vbus: vbus {
+				regulator-name = "sm5703_vbus";
+			};
+
+			sm5703_buck: buck {
+				regulator-name = "sm5703_buck";
+				regulator-min-microvolt = <1500000>;
+				regulator-max-microvolt = <1500000>;
+			};
+		};
+
+		led-controller {
+			compatible = "siliconmitus,sm5703-flash";
+
+			flash-gpio = <&tlmm 34 GPIO_ACTIVE_HIGH>;
+			torch-gpio = <&tlmm 36 GPIO_ACTIVE_HIGH>;
+
+			pinctrl-0 = <&sm5703_flash_default>;
+			pinctrl-names = "default";
+
+			led {
+				function = LED_FUNCTION_FLASH;
+				color = <LED_COLOR_ID_WHITE>;
+				led-max-microamp = <170000>;
+				flash-max-microamp = <1200000>;
+			};
+		};
+
+		charger {
+			compatible = "siliconmitus,sm5703-charger";
+			siliconmitus,enable-autoset;
+			siliconmitus,enable-autostop;
+		};
+	};
+};
+
 &blsp_uart2 {
 	status = "okay";
 };
@@ -307,6 +382,7 @@
 
 &usb {
 	extcon = <&muic>, <&muic>;
+	vbus-supply = <&sm5703_vbus>;
 	status = "okay";
 };
 
@@ -402,6 +478,13 @@
 		bias-pull-down;
 	};
 
+	mrstb_default: mrstb-default-state {
+		pins = "gpio24";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
 	muic_i2c_default: muic-i2c-default-state {
 		pins = "gpio105", "gpio106";
 		function = "gpio";
@@ -451,6 +534,13 @@
 
 	sensors_i2c_default: sensors-i2c-default-state {
 		pins = "gpio31", "gpio32";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	sm5703_flash_default: sm5703-flash-default-state {
+		pins = "gpio34", "gpio36";
 		function = "gpio";
 		drive-strength = <2>;
 		bias-disable;
