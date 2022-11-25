@@ -15,10 +15,6 @@
 	vddio-supply = <&pm8916_l5>;
 };
 
-&blsp_i2c5 {
-	status = "disabled";
-};
-
 &front_flash_led {
 	ctrl-gpios = <&tlmm 50 GPIO_ACTIVE_HIGH>;
 };
@@ -41,7 +37,7 @@
 };
 
 &touchscreen {
-	/* FIXME: Missing sm5703-mfd driver to power up vdd-supply */
+	vdd-supply = <&sm5703_ldo3>;
 };
 
 &usb_hs_phy {
