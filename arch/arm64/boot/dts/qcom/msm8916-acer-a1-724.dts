@@ -94,6 +94,44 @@
 &blsp_i2c4 {
 	status = "okay";
 
+	charger: battery@14 {
+		compatible = "qcom,smb1360";
+		reg = <0x14>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <62 IRQ_TYPE_LEVEL_LOW>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&smb_int_default>;
+
+		qcom,battery-profile = <1>; /* downstream forces profile B */
+
+		/* Charger */
+		qcom,charging-timeout = <192>; /* 0 in downstream */
+		qcom,chg-inhibit-disabled;
+		qcom,float-voltage-mv = <4350>;
+		qcom,iterm-ma = <150>;
+		qcom,recharge-thresh-mv = <200>;
+
+		/* FG customize */
+		qcom,fg-auto-recharge-soc = <95>; /* 99 in downstream */
+		qcom,fg-batt-capacity-mah = <3700>;
+		qcom,fg-cc-soc-coeff = <0x806e>;
+		qcom,fg-cutoff-voltage-mv = <3500>;
+		//qcom,fg-ibatt-standby-ma = <200>;
+		qcom,fg-iterm-ma = <150>;
+		qcom,fg-cc-to-cv-mv = <4330>;
+
+		qcom,warm-bat-decidegc = <450>;
+		qcom,cool-bat-decidegc = <100>;
+
+		qcom,shdn-after-pwroff;
+
+		usb_otg_vbus: usb-otg-vbus {
+			regulator-max-microamp = <1800000>;
+		};
+	};
+
 	led-controller@30 {
 		compatible = "kinetic,ktd2026";
 		reg = <0x30>;
@@ -236,12 +274,13 @@
 };
 
 &usb {
-	extcon = <&usb_id>, <&usb_id>;
+	extcon = <&charger>, <&usb_id>;
+	vbus-supply = <&usb_otg_vbus>;
 	status = "okay";
 };
 
 &usb_hs_phy {
-	extcon = <&usb_id>;
+	extcon = <&charger>;
 };
 
 &venus {
@@ -309,6 +348,14 @@
 		function = "gpio";
 		drive-strength = <2>;
 		bias-disable;
+	};
+
+	smb_int_default: smb-int-default-state {
+		pins = "gpio62";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-pull-down;
 	};
 
 	touchscreen_default: touchscreen-default-state {
