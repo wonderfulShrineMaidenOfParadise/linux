@@ -122,6 +122,10 @@
 	pinctrl-0 = <&lcd_bl_en_default>;
 };
 
+&proximity {
+	compatible = "capella,cm36686";
+};
+
 &reg_motor_vdd {
 	gpio = <&tlmm 72 GPIO_ACTIVE_HIGH>;
 };

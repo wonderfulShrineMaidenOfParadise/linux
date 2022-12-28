@@ -32,6 +32,19 @@
 		};
 	};
 
+	reg_proximity_vled: regulator-proximity-vled {
+		compatible = "regulator-fixed";
+		regulator-name = "proximity_led";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+
+		gpio = <&tlmm 8 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+
+		pinctrl-0 = <&proxy_ldo_en_default>;
+		pinctrl-names = "default";
+	};
+
 	reg_touch_key: regulator-touch-key {
 		compatible = "regulator-fixed";
 		regulator-name = "touch_key";
@@ -68,6 +81,21 @@
 
 		pinctrl-0 = <&accel_int_default>;
 		pinctrl-names = "default";
+	};
+
+	proximity: proximity@60 {
+		compatible = "capella,cm36672p";
+		reg = <0x60>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <113 IRQ_TYPE_EDGE_FALLING>;
+
+		pinctrl-0 = <&proxy_int_default>;
+		pinctrl-names = "default";
+
+		vdd-supply = <&pm8916_l17>;
+		vddio-supply = <&pm8916_l5>;
+		vled-supply = <&reg_proximity_vled>;
 	};
 };
 
@@ -117,6 +145,20 @@
 };
 
 &tlmm {
+	proxy_int_default: proxy-int-default-state {
+		pins = "gpio113";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	proxy_ldo_en_default: proxy-ldo-en-default-state {
+		pins = "gpio8";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
 	tkey_en_default: tkey-en-default-state {
 		pins = "gpio97";
 		function = "gpio";
