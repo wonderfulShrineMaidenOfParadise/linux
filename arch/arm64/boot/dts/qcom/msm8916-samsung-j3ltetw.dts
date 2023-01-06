@@ -28,6 +28,10 @@
 	status = "okay";
 };
 
+&usb_hs_phy {
+	qcom,init-seq = /bits/ 8 <0x1 0x19 0x2 0x0b>;
+};
+
 &muic_i2c_default {
 	pins = "gpio0", "gpio1";
 };
