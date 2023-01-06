@@ -32,6 +32,10 @@
 	qcom,micbias1-ext-cap;
 };
 
+&reg_pvdd_nfc {
+	gpio = <&tlmm 90 GPIO_ACTIVE_HIGH>;
+};
+
 &reg_vdd_lcd_1p8 {
 	gpio = <&tlmm 16 GPIO_ACTIVE_HIGH>;
 };
@@ -46,6 +50,10 @@
 
 &lcd_1p8_ldo_en_default {
 	pins = "gpio16";
+};
+
+&nfc_pvdd_en_default {
+	pins = "gpio90";
 };
 
 &vtcam_flash_en_default {

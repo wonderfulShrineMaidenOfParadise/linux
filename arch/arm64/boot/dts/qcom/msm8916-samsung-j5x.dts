@@ -55,10 +55,21 @@
 	interrupts = <121 IRQ_TYPE_EDGE_FALLING>;
 };
 
+&nfc {
+	interrupts = <50 IRQ_TYPE_EDGE_RISING>;
+
+	enable-gpios = <&tlmm 94 GPIO_ACTIVE_HIGH>;
+	firmware-gpios = <&tlmm 116 GPIO_ACTIVE_HIGH>;
+};
+
 &panel {
 	compatible = "samsung,s6e8aa5x01-ams520kt01";
 	vdd3-supply = <&reg_vdd_lcd_1p8>;
 	vci-supply = <&reg_vdd_lcd_3p0>;
+};
+
+&reg_pvdd_nfc {
+	gpio = <&tlmm 89 GPIO_ACTIVE_HIGH>;
 };
 
 &reg_vdd_lcd_1p8 {
@@ -95,6 +106,20 @@
 
 &muic_int_default {
 	pins = "gpio121";
+};
+
+&nfc_default {
+	irq-pins {
+		pins = "gpio50";
+	};
+
+	nfc-pins {
+		pins = "gpio94", "gpio116";
+	};
+};
+
+&nfc_pvdd_en_default {
+	pins = "gpio89";
 };
 
 &vtcam_flash_en_default {
