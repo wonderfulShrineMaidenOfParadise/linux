@@ -55,7 +55,20 @@
 };
 
 &i2c_sensors {
-	status = "disabled";
+	proximity@60 {
+		compatible = "capella,cm36672p";
+		reg = <0x60>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <113 IRQ_TYPE_EDGE_FALLING>;
+
+		vdd-supply = <&pm8916_l17>;
+		vddio-supply = <&pm8916_l5>;
+		vled-supply = <&pm8916_l17>;
+
+		pinctrl-0 = <&proxy_int_default>;
+		pinctrl-names = "default";
+	};
 };
 
 &panel {
