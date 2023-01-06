@@ -63,6 +63,10 @@
 	vci-supply = <&reg_vdd_lcd_3p0>;
 };
 
+&reg_pvdd_nfc {
+	gpio = <&tlmm 50 GPIO_ACTIVE_HIGH>;
+};
+
 &reg_vdd_lcd_1p8 {
 	status = "disabled";
 };
@@ -90,4 +94,8 @@
 		drive-strength = <2>;
 		bias-disable;
 	};
+};
+
+&nfc_pvdd_en_default {
+	pins = "gpio50";
 };
