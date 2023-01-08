@@ -239,11 +239,17 @@ properties:
               - samsung,a5u-eur
               - samsung,e5
               - samsung,e7
+              - samsung,fortuna3g
+              - samsung,fortunaltezt
+              - samsung,gprimeltecan
               - samsung,grandmax
+              - samsung,grandprimelte
               - samsung,gt510
               - samsung,gt58
+              - samsung,heatqlte
               - samsung,j5
               - samsung,j5x
+              - samsung,rossa
               - samsung,serranove
               - thwc,uf896
               - thwc,ufi001c
