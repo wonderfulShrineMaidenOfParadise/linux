@@ -6,6 +6,7 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 
 / {
 	model = "Fareastone Smart 506";
@@ -46,6 +47,29 @@
 			pinctrl-0 = <&gpio_leds_default>;
 			pinctrl-names = "default";
 		};
+	};
+};
+
+&blsp_i2c5 {
+	status = "okay";
+
+	touchscreen@5d {
+		compatible = "goodix,gt911";
+		reg = <0x5d>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <13 IRQ_TYPE_EDGE_RISING>;
+
+		reset-gpios = <&tlmm 12 GPIO_ACTIVE_LOW>;
+
+		AVDD28-supply = <&pm8909_l17>;
+		VDDIO-supply = <&pm8909_l6>;
+
+		touchscreen-size-x = <720>;
+		touchscreen-size-y = <1280>;
+
+		pinctrl-0 = <&touchscreen_default>;
+		pinctrl-names = "default";
 	};
 };
 
@@ -195,5 +219,21 @@
 		function = "gpio";
 		drive-strength = <2>;
 		bias-disable;
+	};
+
+	touchscreen_default: touchscreen-default-state {
+		reset-pins {
+			pins = "gpio12";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-disable;
+		};
+
+		touchscreen-pins {
+			pins = "gpio13";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-pull-up;
+		};
 	};
 };
