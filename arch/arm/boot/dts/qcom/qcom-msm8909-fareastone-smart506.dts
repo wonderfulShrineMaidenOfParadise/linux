@@ -7,6 +7,7 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/pinctrl/qcom,pmic-mpp.h>
 
 / {
 	model = "Fareastone Smart 506";
@@ -19,6 +20,15 @@
 
 	chosen {
 		stdout-path = "serial0";
+	};
+
+	backlight: backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pm8909_pwm 0 100000>;
+
+		brightness-levels = <0 255>;
+		num-interpolated-steps = <255>;
+		default-brightness-level = <255>;
 	};
 
 	gpio-keys {
@@ -74,6 +84,12 @@
 };
 
 &blsp_uart1 {
+	status = "okay";
+};
+
+&pm8909_pwm {
+	pinctrl-0 = <&pwm_out>;
+	pinctrl-names = "default";
 	status = "okay";
 };
 
@@ -203,6 +219,16 @@
 	l18 {
 		regulator-min-microvolt = <2700000>;
 		regulator-max-microvolt = <2700000>;
+	};
+};
+
+&pm8909_mpps {
+	pwm_out: mpp2-state {
+		pins = "mpp2";
+		function = "digital";
+		power-source = <PM8916_MPP_VPH>;
+		output-low;
+		qcom,dtest = <1>;
 	};
 };
 
