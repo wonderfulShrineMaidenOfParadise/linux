@@ -76,6 +76,26 @@
 	};
 };
 
+&blsp_i2c1 {
+	status = "okay";
+
+	accelerometer@18 {
+		compatible = "bosch,bma222";
+		reg = <0x18>;
+
+		vddio-supply = <&pm8909_l6>;
+		vdd-supply = <&pm8909_l17>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <96 IRQ_TYPE_EDGE_RISING>,
+			     <65 IRQ_TYPE_EDGE_RISING>;
+		interrupt-names = "INT1", "INT2";
+
+		pinctrl-0 = <&accel_int_default>;
+		pinctrl-names = "default";
+	};
+};
+
 &blsp_i2c5 {
 	status = "okay";
 
@@ -249,6 +269,13 @@
 };
 
 &tlmm {
+	accel_int_default: accel-int-default-state {
+		pins = "gpio65", "gpio96";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
 	camera_flash_default: camera-flash-default-state {
 		pins = "gpio31", "gpio32";
 		function = "gpio";
