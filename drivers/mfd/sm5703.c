@@ -24,8 +24,7 @@ static const struct regmap_config sm5703_regmap_config = {
 	.val_bits	= 8,
 };
 
-static int sm5703_i2c_probe(struct i2c_client *i2c,
-			    const struct i2c_device_id *id)
+static int sm5703_i2c_probe(struct i2c_client *i2c)
 {
 	struct sm5703_dev *sm5703;
 	struct device *dev = &i2c->dev;
