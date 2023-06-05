@@ -57,7 +57,7 @@
 	};
 
 	flash-led-controller {
-		/* Actually qcom,leds-gpio-flash */
+		/* Actually fiti,fp6773c */
 		compatible = "sgmicro,sgm3140";
 		enable-gpios = <&tlmm 31 GPIO_ACTIVE_HIGH>;
 		flash-gpios = <&tlmm 32 GPIO_ACTIVE_HIGH>;
