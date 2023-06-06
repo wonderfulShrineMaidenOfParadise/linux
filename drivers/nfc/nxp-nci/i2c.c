@@ -35,6 +35,7 @@ struct nxp_nci_i2c_phy {
 
 	struct gpio_desc *gpiod_en;
 	struct gpio_desc *gpiod_fw;
+	struct regulator *pvdd;
 
 	int hard_fault; /*
 			 * < 0 if hardware error occurred (e.g. i2c err)
@@ -263,6 +264,20 @@ static const struct acpi_gpio_mapping acpi_nxp_nci_gpios[] = {
 	{ }
 };
 
+static void nxp_nci_i2c_poweroff(void *data)
+{
+	struct nxp_nci_i2c_phy *phy = data;
+	struct device *dev = &phy->i2c_dev->dev;
+	struct regulator *pvdd = phy->pvdd;
+	int r;
+
+	if (!IS_ERR(pvdd) && regulator_is_enabled(pvdd)) {
+		r = regulator_disable(pvdd);
+		if (r < 0)
+			dev_warn(dev, "Failed to disable regulator pvdd: %d\n", r);
+	}
+}
+
 static int nxp_nci_i2c_probe(struct i2c_client *client)
 {
 	struct device *dev = &client->dev;
@@ -298,6 +313,26 @@ static int nxp_nci_i2c_probe(struct i2c_client *client)
 		return PTR_ERR(phy->gpiod_fw);
 	}
 
+	phy->pvdd = devm_regulator_get_optional(dev, "pvdd");
+	if (IS_ERR(phy->pvdd)) {
+		r = PTR_ERR(phy->pvdd);
+		if (r != -ENODEV)
+			return dev_err_probe(dev, r,
+					     "Failed to get regulator pvdd\n");
+	} else {
+		r = regulator_enable(phy->pvdd);
+		if (r < 0) {
+			nfc_err(dev, "Failed to enable regulator pvdd: %d\n", r);
+			return r;
+		}
+	}
+
+	r = devm_add_action_or_reset(dev, nxp_nci_i2c_poweroff, phy);
+	if (r < 0) {
+		nfc_err(dev, "Failed to install poweroff handler: %d\n", r);
+		return r;
+	}
+
 	r = nxp_nci_probe(phy, &client->dev, &i2c_phy_ops,
 			  NXP_NCI_I2C_MAX_PAYLOAD, &phy->ndev);
 	if (r < 0)
@@ -319,6 +354,8 @@ static void nxp_nci_i2c_remove(struct i2c_client *client)
 
 	nxp_nci_remove(phy->ndev);
 	free_irq(client->irq, phy);
+
+	nxp_nci_i2c_poweroff(phy);
 }
 
 static const struct i2c_device_id nxp_nci_i2c_id_table[] = {
