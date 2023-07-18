@@ -29,6 +29,24 @@
 		};
 	};
 
+	bat: battery {
+		compatible = "simple-battery";
+		voltage-min-design-microvolt = <3400000>;
+		voltage-max-design-microvolt = <4350000>;
+		energy-full-design-microwatt-hours = <11400000>;
+		charge-full-design-microamp-hours = <3000000>;
+
+		ocv-capacity-celsius = <25>;
+		ocv-capacity-table-0 = <4314000 100>, <4252000 95>, <4197000 90>,
+			<4143000 85>, <4092000 80>, <4044000 75>, <3999000 70>,
+			<3953000 65>, <3905000 60>, <3868000 55>, <3841000 50>,
+			<3818000 45>, <3799000 40>, <3783000 35>, <3767000 30>,
+			<3748000 25>, <3724000 20>, <3699000 16>, <3678000 13>,
+			<3671000 11>, <3668000 10>, <3664000 9>, <3659000 8>,
+			<3649000 7>, <3627000 6>, <3588000 5>, <3535000 4>,
+			<3469000 3>, <3381000 2>, <3252000 1>, <3000000 0>;
+	};
+
 	gpio-hall-sensor {
 		compatible = "gpio-keys";
 
@@ -267,6 +285,11 @@
 &pm8916_l8 {
 	regulator-min-microvolt = <2950000>;
 	regulator-max-microvolt = <2950000>;
+};
+
+&pm8916_bms {
+	monitored-battery = <&bat>;
+	status = "okay";
 };
 
 &pm8916_resin {
