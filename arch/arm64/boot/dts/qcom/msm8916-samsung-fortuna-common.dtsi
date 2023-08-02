@@ -117,6 +117,10 @@
 	extcon = <&muic>;
 };
 
+&venus {
+	status = "okay";
+};
+
 &wcnss {
 	status = "okay";
 };
