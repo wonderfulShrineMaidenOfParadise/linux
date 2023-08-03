@@ -27,11 +27,20 @@
 	};
 };
 
+&accelerometer {
+	vdd-supply = <&pm8916_l5>;
+	vddio-supply = <&pm8916_l5>;
+};
+
 &front_flash_led {
 	status = "disabled";
 };
 
 &gpio_hall_sensor {
+	status = "disabled";
+};
+
+&i2c_sensors {
 	status = "disabled";
 };
 
