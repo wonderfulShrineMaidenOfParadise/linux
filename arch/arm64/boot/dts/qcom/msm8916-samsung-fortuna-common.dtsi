@@ -359,7 +359,7 @@
 	pinctrl-names = "default", "sleep";
 
 	panel: panel@0 {
-		compatible = "samsung,gprime-panel";
+		compatible = "samsung,fortuna-panel";
 		reg = <0>;
 
 		vddio-supply = <&pm8916_l6>;
