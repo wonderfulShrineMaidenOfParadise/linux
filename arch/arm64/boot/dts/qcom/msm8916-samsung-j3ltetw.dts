@@ -10,11 +10,28 @@
 	chassis-type = "handset";
 };
 
+&accelerometer {
+	mount-matrix = "0", "-1", "0",
+		       "1", "0", "0",
+		       "0", "0", "-1";
+};
+
 &i2c_muic {
 	sda-gpios = <&tlmm 0 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
 	scl-gpios = <&tlmm 1 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
 };
 
+&i2c_sensors {
+	/* I2C2 */
+	sda-gpios = <&tlmm 6 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	scl-gpios = <&tlmm 7 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	status = "okay";
+};
+
 &muic_i2c_default {
 	pins = "gpio0", "gpio1";
+};
+
+&sensors_i2c_default {
+	pins = "gpio6", "gpio7";
 };
