@@ -80,7 +80,7 @@ static int sm5703_charger_probe (struct platform_device *pdev) {
     struct device* dev = &pdev->dev;
     struct power_supply_config charger_cfg = {};
     struct sm5703_charger *drv;
-    bool use_autoset, use_autostop, use_topoff_timer;
+    bool __maybe_unused use_autoset, use_autostop, use_topoff_timer;
 
 	drv = devm_kzalloc(&pdev->dev, sizeof(*drv), GFP_KERNEL);
 	if (!drv)
