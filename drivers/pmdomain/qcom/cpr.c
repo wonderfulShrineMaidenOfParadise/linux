@@ -1511,14 +1511,14 @@ static const struct cpr_acc_desc qcs404_cpr_acc_desc = {
 	.acc_desc = &qcs404_acc_desc,
 };
 
-static int cpr_power_off(struct generic_pm_domain *domain)
+static int __maybe_unused cpr_power_off(struct generic_pm_domain *domain)
 {
 	struct cpr_drv *drv = container_of(domain, struct cpr_drv, pd);
 
 	return cpr_disable(drv);
 }
 
-static int cpr_power_on(struct generic_pm_domain *domain)
+static int __maybe_unused cpr_power_on(struct generic_pm_domain *domain)
 {
 	struct cpr_drv *drv = container_of(domain, struct cpr_drv, pd);
 
