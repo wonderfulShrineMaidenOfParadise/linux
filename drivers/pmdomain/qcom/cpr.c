@@ -1517,14 +1517,14 @@ static unsigned int cpr_get_performance_state(struct generic_pm_domain *genpd,
 	return dev_pm_opp_get_level(opp);
 }
 
-static int cpr_power_off(struct generic_pm_domain *domain)
+static int __maybe_unused cpr_power_off(struct generic_pm_domain *domain)
 {
 	struct cpr_drv *drv = container_of(domain, struct cpr_drv, pd);
 
 	return cpr_disable(drv);
 }
 
-static int cpr_power_on(struct generic_pm_domain *domain)
+static int __maybe_unused cpr_power_on(struct generic_pm_domain *domain)
 {
 	struct cpr_drv *drv = container_of(domain, struct cpr_drv, pd);
 
