@@ -92,8 +92,8 @@ static const struct regmap_config sm5703_fg_regmap = {
 };
 
 static int sm5703_fg_probe (struct i2c_client* i2c) {
-    int error;
-    struct device* dev = &i2c->dev;
+    int __maybe_unused error;
+    struct device* __maybe_unused dev = &i2c->dev;
     struct power_supply_config fg_cfg = {};
     struct sm5703_fg *drv;
 
