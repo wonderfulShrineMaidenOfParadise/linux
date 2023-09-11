@@ -31,7 +31,6 @@ dtb-$(CONFIG_ARCH_QCOM) += \
 	qcom-msm8909-nokia-sparkler.dtb \
 	qcom-msm8916-samsung-e5.dtb \
 	qcom-msm8916-samsung-e7.dtb \
-	qcom-msm8916-samsung-fortunaltezt.dtb \
 	qcom-msm8916-samsung-grandmax.dtb \
 	qcom-msm8916-samsung-serranove.dtb \
 	qcom-msm8960-cdp.dtb \
