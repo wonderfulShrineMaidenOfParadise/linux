@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
+/dts-v1/;
+
+#include "msm8939-huawei-kiwi.dts"
+
+/ {
+	model = "Huawei G7 Plus";
+	compatible = "huawei,rio", "huawei,kiwi", "qcom,msm8939";
+
+	reserved-memory {
+		reserved@84a00000 {
+			status = "disabled";
+		};
+	};
+};
+
+&lpass {
+	dai-link@3 {
+		status = "disabled";
+	};
+};
+
+&q6afedai {
+	dai@22 {
+		status = "disabled";
+	};
+};
+
+&sound {
+	model = "msm8916";
+
+	pinctrl-0 = <&cdc_pdm_default>;
+	pinctrl-1 = <&cdc_pdm_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+&sound_link_backend2 {
+	status = "disabled";
+};
+
+&speaker_codec {
+	status = "disabled";
+};
