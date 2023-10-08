@@ -41,12 +41,15 @@
 #define IST30XXB_WHOAMI			0x300b300b
 #define IST3038_WHOAMI			0x30383038
 
+#define IMAGIS_PROTOCOL_A		0xa
+#define IMAGIS_PROTOCOL_B		0xb
+
 struct imagis_properties {
 	unsigned int interrupt_msg_cmd;
 	unsigned int touch_coord_cmd;
 	unsigned int chipid_base;
 	unsigned int whoami_val;
-	bool protocol_b;
+	u8 protocol;
 };
 
 struct imagis_ts {
@@ -122,13 +125,24 @@ static irqreturn_t imagis_interrupt(int irq, void *dev_id)
 	finger_pressed = intr_message & IST3038C_FINGER_STATUS_MASK;
 
 	for (i = 0; i < finger_count; i++) {
-		if (ts->tdata->protocol_b)
+		switch (ts->tdata->protocol) {
+		case IMAGIS_PROTOCOL_A:
 			error = imagis_i2c_read_reg(ts,
-						    ts->tdata->touch_coord_cmd, &finger_status);
-		else
+						    ts->tdata->touch_coord_cmd,
+						    &finger_status);
+			break;
+		case IMAGIS_PROTOCOL_B:
 			error = imagis_i2c_read_reg(ts,
 						    ts->tdata->touch_coord_cmd + (i * 4),
 						    &finger_status);
+			break;
+		default:
+			dev_err(&ts->client->dev,
+				"Missing protocol type\n");
+			error = -EINVAL;
+			break;
+		}
+
 		if (error) {
 			dev_err(&ts->client->dev,
 				"failed to read coordinates for finger %d: %d\n",
@@ -381,7 +395,7 @@ static const struct imagis_properties imagis_3038_data = {
 	.touch_coord_cmd = IST30XX_REG_STATUS,
 	.chipid_base = IST30XXB_REG_CHIPID_BASE,
 	.whoami_val = IST3038_WHOAMI,
-	.protocol_b = true,
+	.protocol = IMAGIS_PROTOCOL_A,
 };
 
 static const struct imagis_properties imagis_3038c_data = {
@@ -389,6 +403,7 @@ static const struct imagis_properties imagis_3038c_data = {
 	.touch_coord_cmd = IST3038C_REG_TOUCH_COORD,
 	.chipid_base = IST3038C_REG_CHIPID_BASE,
 	.whoami_val = IST3038C_WHOAMI,
+	.protocol = IMAGIS_PROTOCOL_B,
 };
 
 #ifdef CONFIG_OF
