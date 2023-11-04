@@ -47,6 +47,12 @@
 	};
 };
 
+&accelerometer {
+	mount-matrix = "-1", "0", "0",
+			"0", "1", "0",
+			"0", "0", "1";
+};
+
 &battery {
 	charge-term-current-microamp = <200000>;
 	constant-charge-current-max-microamp = <1500000>;
