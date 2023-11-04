@@ -73,6 +73,12 @@
 	};
 };
 
+&accelerometer {
+	mount-matrix = "-1", "0", "0",
+			"0", "1", "0",
+			"0", "0", "1";
+};
+
 &panel {
 	/* Actually samsung,ea8061v-ams497ee10 */
 	compatible = "samsung,ea8061v-ams497ee01";
