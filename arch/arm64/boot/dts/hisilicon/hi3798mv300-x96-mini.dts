@@ -1,0 +1,71 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/dts-v1/;
+
+#include "hi3798cv200.dtsi"
+
+/ {
+	model = "X96 Mini (Hi3798mv300)";
+	compatible = "hisilicon,hi3798mv300-x96-mini", "hisilicon,hi3798mv300", "hisilicon,hi3798cv200";
+	chassis-type = "embedded";
+
+	aliases {
+		serial0 = &uart0;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		bl31-mem {
+			reg = <0 0xc00000 0 0x40000>;
+			no-map;
+		};
+
+		mem1 {
+			reg = <0 0x30000000 0 0x100000>;
+			no-map;
+		};
+
+		mem2 {
+			reg = <0 0x0 0 0x1000>;
+			no-map;
+		};
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x0 0x0 0x40000000>;
+	};
+};
+
+&ehci {
+	status = "okay";
+};
+
+&emmc {
+	//compatible = "snps,dw-mshc";
+	bus-width = <8>;
+	cap-mmc-highspeed;
+	non-removable;
+	status = "okay";
+};
+
+&ohci {
+	status = "okay";
+};
+
+&sd0 {
+	bus-width = <4>;
+	cap-sd-highspeed;
+	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+};
