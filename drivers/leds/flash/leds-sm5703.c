@@ -198,9 +198,16 @@ static const struct platform_device_id sm5703_flash_id[] = {
 };
 MODULE_DEVICE_TABLE(platform, sm5703_flash_id);
 
+static const struct of_device_id sm5703_flash_match[] = {
+	{ .compatible = "siliconmitus,sm5703-flash", },
+	{ /* sentinel */ },
+};
+MODULE_DEVICE_TABLE(of, sm5703_flash_match);
+
 static struct platform_driver sm5703_flash_driver = {
 	.driver = {
 		.name = "sm5703-flash",
+		.of_match_table = sm5703_flash_match,
 	},
 	.probe	= sm5703_flash_probe,
 	.id_table	= sm5703_flash_id,
