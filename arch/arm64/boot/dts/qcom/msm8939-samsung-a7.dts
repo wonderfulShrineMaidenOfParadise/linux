@@ -43,21 +43,6 @@
 		precharge-upper-limit-microvolt = <3500000>;
 	};
 
-	flash-led-controller {
-		compatible = "richtek,rt5033-led";
-		enable-gpios = <&tlmm 34 GPIO_ACTIVE_HIGH>;
-		flash-gpios = <&tlmm 36 GPIO_ACTIVE_HIGH>;
-
-		pinctrl-0 = <&camera_flash_default>;
-		pinctrl-names = "default";
-
-		flash_led: led {
-			function = LED_FUNCTION_FLASH;
-			color = <LED_COLOR_ID_WHITE>;
-			flash-max-timeout-us = <544000>;
-		};
-	};
-
 	gpio-hall-sensor {
 		compatible = "gpio-keys";
 
@@ -425,6 +410,21 @@
 			compatible = "richtek,rt5033-charger";
 			monitored-battery = <&battery>;
 			richtek,usb-connector = <&usb_con>;
+		};
+
+		flash-led-controller {
+			compatible = "richtek,rt5033-led";
+			enable-gpios = <&tlmm 34 GPIO_ACTIVE_HIGH>;
+			flash-gpios = <&tlmm 36 GPIO_ACTIVE_HIGH>;
+
+			pinctrl-0 = <&camera_flash_default>;
+			pinctrl-names = "default";
+
+			flash_led: led {
+				function = LED_FUNCTION_FLASH;
+				color = <LED_COLOR_ID_WHITE>;
+				flash-max-timeout-us = <544000>;
+			};
 		};
 	};
 };
