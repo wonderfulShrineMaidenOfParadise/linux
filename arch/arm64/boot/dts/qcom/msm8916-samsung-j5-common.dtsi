@@ -268,6 +268,9 @@
 
 			sm5703_vbus: vbus {
 				regulator-name = "sm5703_vbus";
+				/* HACK Keep it always on otherwise the USB
+				 * network breaks */
+				regulator-always-on;
 			};
 
 			sm5703_buck: buck {
@@ -394,7 +397,7 @@
 
 &usb {
 	extcon = <&muic>, <&muic>;
-	vbus-supply = <&sm5703_vbus>;
+	//vbus-supply = <&sm5703_vbus>;
 	status = "okay";
 };
 
