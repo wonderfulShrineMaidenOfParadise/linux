@@ -374,7 +374,7 @@ static const struct ak_def ak_def_array[] = {
 			AK09912_REG_HYL,
 			AK09912_REG_HZL},
 	},
-	{
+	[AK09918] = {
 		.type = AK09918,
 		.raw_to_gauss = ak09912_raw_to_gauss,
 		.range = 32752,
